@@ -30,23 +30,34 @@ with col2:
     teams2.remove(batting_team)
     bowling_team = st.selectbox('Select the bowling team', sorted(teams2))
 
+# default_city = 0
+# for city in cities:
+#     if city in batting_team:
+#         print(city, batting_team, bowling_team)
+#         break
+#     default_city += 1
+
 selected_city = st.selectbox('Select host city', sorted(cities))
 
-target = st.number_input('Target')
+target = st.number_input('Target', min_value=0, max_value=400, step=1)
 
 
 col3, col4, col5 = st.columns(3)
 
 with col3:
-    score = st.number_input('Score')
+    score = st.number_input('Score', min_value=0, max_value=400, step=1)
 with col4:
-    overs = st.number_input('Overs completed')
+    overs = st.number_input(
+        'Overs completed', min_value=0.0, max_value=20.0, step=0.1, format="%.1f")
 with col5:
-    wickets = st.number_input('Wickets out')
+    wickets = st.number_input('Wickets out', min_value=0, max_value=10, step=1)
 
 if st.button('Predict Probability'):
     runs_left = target - score
-    balls_left = 120 - (overs*6)
+    ov = overs//1
+    balls = ((ov*6) + (overs-ov)*10)
+    # print(balls)
+    balls_left = 120 - balls
     wickets = 10 - wickets
     try:
         crr = score/overs
@@ -58,8 +69,8 @@ if st.button('Predict Probability'):
         result = pipe.predict_proba(input_df)
         loss = result[0][0]
         win = result[0][1]
-        st.header(batting_team + "- " + str(round(win*100)) + "%")
-        st.header(bowling_team + "- " + str(round(loss*100)) + "%")
+        st.header(batting_team + "- " + str(round(win*100, 1)) + "%")
+        st.header(bowling_team + "- " + str(round(loss*100, 1)) + "%")
 
     except ZeroDivisionError as e:
         st.text("Overs can not be zero.")
